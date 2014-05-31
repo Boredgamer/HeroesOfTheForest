@@ -12,16 +12,13 @@ public class Player {
 	private int xPos;
 	private int yPos;
 	private boolean inCombat = false;
+	private Rectangle overworldCollision = new Rectangle(xPos, yPos, 20, 50);
 	
 	private static int MOVE_DISTANCE = 10;
 	
 	public Player(){
 		xPos = 390;
 		yPos = 500;
-	}
-	
-	public void combatChange(boolean b){
-		inCombat = b;
 	}
 	
 	public void setGender(boolean b){
@@ -52,11 +49,23 @@ public class Player {
 		emblem = 0;
 	}
 	
+	public Rectangle hitbox(){
+		return overworldCollision;
+	}
+	
+	public void combatChange(boolean b){
+		inCombat = b;
+		if (b){
+			System.out.println("Let's do this!");
+		}
+	}
+	
 	public void moveLeft() {
 		xPos -= MOVE_DISTANCE;
 		if (xPos <= 0){
 			xPos = 0; 
 		}
+		overworldCollision = new Rectangle(xPos, yPos, 20, 50);
 	}
 
 	public void moveRight() {
@@ -64,6 +73,7 @@ public class Player {
 		if (xPos >= 780){
 			xPos = 780; 
 		}
+		overworldCollision = new Rectangle(xPos, yPos, 20, 50);
 	}
 	
 	public void moveUp() {
@@ -71,6 +81,7 @@ public class Player {
 		if (yPos <= 0){
 			yPos = 0; 
 		}
+		overworldCollision = new Rectangle(xPos, yPos, 20, 50);
 	}
 	
 	public void moveDown() {
@@ -78,6 +89,7 @@ public class Player {
 		if (yPos >= 550){
 			yPos = 550; 
 		}
+		overworldCollision = new Rectangle(xPos, yPos, 20, 50);
 	}
 		
 	public void drawPlayer(Graphics g){

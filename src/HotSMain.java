@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class HotSMain extends JPanel implements ActionListener, MouseListener, MouseMotionListener, KeyListener{
 	
-	private int scene = 4;
+	private int scene = 2;
 	private static int TITLE = 0;
 	private static int PROLOGUE = 1;
 	private static int OVERWORLD = 2;
@@ -16,6 +16,7 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	private static int BATTLE = 4;
 	
 	private Player player;
+	ArrayList<Enemy> enemies = new ArrayList<Enemy>();
 	
 	//General
 	private JFrame frame = new JFrame();
@@ -32,7 +33,7 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 		frame.setTitle("Heroes of the Forest");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);		
 		bottomScreen.setPreferredSize(new Dimension(800, 150));
-		bottomScreen.setBackground(Color.BLACK);
+		bottomScreen.setBackground(Color.LIGHT_GRAY);
 		canvas.add(bottomScreen, BorderLayout.SOUTH);
 		ImageIcon bg = new ImageIcon("FirstBG.jpg");
 		background = bg.getImage();
@@ -40,6 +41,7 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 		frame.pack();
 		frame.setVisible(true);
 		player = new Player();
+		enemies.add(new Stalker(375, 200));
 		player.defaultPlayer();
 		frame.addKeyListener(this);
 	}
@@ -62,19 +64,34 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	//Hotkeys!
 	public void keyPressed(KeyEvent e){
 		int keyID = e.getKeyCode();
-		if (keyID == KeyEvent.VK_UP || keyID == KeyEvent.VK_W){
-		player.moveUp();
+		if (scene == 2){
+			if (keyID == KeyEvent.VK_UP || keyID == KeyEvent.VK_W){
+				player.moveUp();
+			}
+			if (keyID == KeyEvent.VK_DOWN || keyID == KeyEvent.VK_S){
+				player.moveDown();
+			}
+			if (keyID == KeyEvent.VK_LEFT || keyID == KeyEvent.VK_A){
+				player.moveLeft();
+			}
+			if (keyID == KeyEvent.VK_RIGHT || keyID == KeyEvent.VK_D){
+				player.moveRight();
+			}
+			int loop;
+			for (loop = 0; loop < enemies.size(); loop++){
+				if (enemies.get(loop).hitbox().intersects(player.hitbox())){
+					player.combatChange(true);
+					enemies.get(loop).combatChange(true);
+					battleBegin();
+				}
+			}
 		}
-		if (keyID == KeyEvent.VK_DOWN || keyID == KeyEvent.VK_S){
-			player.moveDown();
-		}
-		if (keyID == KeyEvent.VK_LEFT || keyID == KeyEvent.VK_A){
-			player.moveLeft();
-		}
-		if (keyID == KeyEvent.VK_RIGHT || keyID == KeyEvent.VK_D){
-			player.moveRight();
-		}
+
 		repaint();
+	}
+	
+	public void battleBegin(){
+		scene = 4;
 	}
 
 	public void keyReleased(KeyEvent e){
@@ -96,6 +113,10 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	public void paintComponent(Graphics g){
 		super.paintComponent(g);
 		g.drawImage(background, 0, 0, this);
+		int loop;
+		for (loop = 0; loop < enemies.size(); loop++){
+			enemies.get(loop).drawEnemy(g);
+		}
 		player.drawPlayer(g);
 	}
 
