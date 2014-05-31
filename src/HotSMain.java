@@ -20,6 +20,15 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	//General
 	private JFrame frame = new JFrame();
 	private JPanel bottomScreen = new JPanel();
+	
+	private ArrayList<JButton> menuButtons = new ArrayList<JButton>();
+	private JButton itemsButton = new JButton("Items");
+	private JButton equipButton = new JButton("Equip");
+	private JButton skillsButton = new JButton("Skills");
+	private JButton statusButton = new JButton("Status");
+	private JButton settingsButton = new JButton("Settings");
+	private JButton dataButton = new JButton("Data");
+	
 	private Container canvas = frame.getContentPane();
 	
 	private Image background;
@@ -27,12 +36,27 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	public HotSMain(){
 		setPreferredSize(new Dimension(800, 600));
 		canvas.add(this);
-		setBackground(Color.BLACK);
+		setBackground(Color.GRAY);
 		frame.setResizable(false);
 		frame.setTitle("Heroes of the Forest");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);		
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	
+		
 		bottomScreen.setPreferredSize(new Dimension(800, 150));
-		bottomScreen.setBackground(Color.BLACK);
+		bottomScreen.setBackground(Color.DARK_GRAY);
+		bottomScreen.setVisible(false);
+		
+		menuButtons.add(itemsButton);
+		menuButtons.add(equipButton);
+		menuButtons.add(skillsButton);
+		menuButtons.add(statusButton);
+		menuButtons.add(settingsButton);
+		menuButtons.add(dataButton);
+		
+		for (JButton button : menuButtons) {
+			bottomScreen.add(button);
+			button.addActionListener(this);
+		}
+		
 		canvas.add(bottomScreen, BorderLayout.SOUTH);
 		ImageIcon bg = new ImageIcon("FirstBG.jpg");
 		background = bg.getImage();
@@ -45,6 +69,20 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	}
 	
 	public void actionPerformed(ActionEvent a){
+		Object source = a.getSource();
+		
+		if (source == itemsButton)
+			itemsButton.setText("ITEMS!");
+		else if (source == equipButton)
+			equipButton.setText("EQUIPMENT!");
+		else if (source == skillsButton)
+			skillsButton.setText("SKILLS");
+		else if (source == settingsButton)
+			settingsButton.setText("SETTINGS");
+		else if (source == statusButton)
+			statusButton.setText("STATUS");
+		else if (source == dataButton)
+			dataButton.setText("DATA");
 	}
 	
 	public void mouseDragged(MouseEvent e){
@@ -63,7 +101,7 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	public void keyPressed(KeyEvent e){
 		int keyID = e.getKeyCode();
 		if (keyID == KeyEvent.VK_UP || keyID == KeyEvent.VK_W){
-		player.moveUp();
+			player.moveUp();
 		}
 		if (keyID == KeyEvent.VK_DOWN || keyID == KeyEvent.VK_S){
 			player.moveDown();
@@ -73,6 +111,11 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 		}
 		if (keyID == KeyEvent.VK_RIGHT || keyID == KeyEvent.VK_D){
 			player.moveRight();
+		}
+		if (keyID == KeyEvent.VK_ENTER) {
+			// Toggle the visible state of the Game Menu
+			Boolean visibleState = bottomScreen.isVisible();
+			bottomScreen.setVisible(!visibleState);
 		}
 		repaint();
 	}
