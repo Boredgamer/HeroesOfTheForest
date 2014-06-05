@@ -9,13 +9,13 @@ public class Stalker extends Enemy {
 
 	private static int EYE = 8;
 	private static int SIZE = 50;
-	private int xPos;
-	private int yPos;
 	
 	public Stalker(int x, int y) {
 		super(x, y);
 		xPos = x;
 		yPos = y;
+		xSize = SIZE;
+		ySize = SIZE;
 		overworldCollision = new Rectangle(xPos-1, yPos-1, SIZE+2, SIZE+2);
 	}
 	

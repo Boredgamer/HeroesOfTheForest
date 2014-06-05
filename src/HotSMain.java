@@ -1,3 +1,4 @@
+
 import javax.sound.sampled.*;
 import javax.swing.*;
 
@@ -8,6 +9,7 @@ import java.util.ArrayList;
 
 public class HotSMain extends JPanel implements ActionListener, MouseListener, MouseMotionListener, KeyListener{
 	
+	//General
 	private int scene = 2;
 	private static int TITLE = 0;
 	private static int PROLOGUE = 1;
@@ -17,11 +19,15 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	
 	private Player player;
 	ArrayList<Enemy> enemies = new ArrayList<Enemy>();
-	
-	//General
+
 	private JFrame frame = new JFrame();
-	private JPanel bottomScreen = new JPanel();
 	
+	private Container canvas = frame.getContentPane();
+	
+	private Image background;
+	
+	//Overworld
+	private JPanel menuScreen = new JPanel();
 	private ArrayList<JButton> menuButtons = new ArrayList<JButton>();
 	private JButton itemsButton = new JButton("Items");
 	private JButton equipButton = new JButton("Equip");
@@ -30,11 +36,13 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	private JButton settingsButton = new JButton("Settings");
 	private JButton dataButton = new JButton("Data");
 	
-	private Container canvas = frame.getContentPane();
+	//Battle
+	ArrayList<Integer> combativeEnemies = new ArrayList<Integer>();
+	private JPanel battleMenu = new JPanel();
 	
-	private Image background;
 	
 	public HotSMain(){
+		//General
 		setPreferredSize(new Dimension(800, 600));
 		canvas.add(this);
 		setBackground(Color.GRAY);
@@ -42,9 +50,10 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 		frame.setTitle("Heroes of the Forest");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	
 		
-		bottomScreen.setPreferredSize(new Dimension(800, 150));
-		bottomScreen.setBackground(Color.DARK_GRAY);
-		bottomScreen.setVisible(false);
+		//Overworld
+		menuScreen.setPreferredSize(new Dimension(800, 150));
+		menuScreen.setBackground(Color.DARK_GRAY);
+		menuScreen.setVisible(false);
 		
 		menuButtons.add(itemsButton);
 		menuButtons.add(equipButton);
@@ -54,13 +63,18 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 		menuButtons.add(dataButton);
 		
 		for (JButton button : menuButtons) {
-			bottomScreen.add(button);
+			menuScreen.add(button);
 			button.addActionListener(this);
 		}
 
-		canvas.add(bottomScreen, BorderLayout.SOUTH);
-		ImageIcon bg = new ImageIcon("FirstBG.jpg");
+		canvas.add(menuScreen, BorderLayout.SOUTH);
+		ImageIcon bg = new ImageIcon("OverworldBG.jpg");
 		background = bg.getImage();
+		
+		//Battle
+		battleMenu.setPreferredSize(new Dimension(800, 150));
+		battleMenu.setBackground(Color.DARK_GRAY);
+		battleMenu.setVisible(false);
 		
 		frame.pack();
 		frame.setVisible(true);
@@ -119,8 +133,8 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 			
 			if (keyID == KeyEvent.VK_ENTER) {
 				// Toggle the visible state of the Game Menu
-				Boolean visibleState = bottomScreen.isVisible();
-				bottomScreen.setVisible(!visibleState);
+				Boolean visibleState = menuScreen.isVisible();
+				menuScreen.setVisible(!visibleState);
 			}
 			
 			int loop;
@@ -137,6 +151,26 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	
 	public void battleBegin(){
 		scene = 4;
+		//Background changer
+		int bgSelector = (int)(10*Math.random()+10);
+		if (bgSelector > 5){
+			ImageIcon bg = new ImageIcon("BattleBG1.jpg");
+			background = bg.getImage();
+			player.battleBegin(235, 440);
+			int placed = 0;
+			int loop;
+			for (loop = 0; loop < enemies.size(); loop++){
+				if (enemies.get(loop).getActivity()){
+					enemies.get(loop).battleBegin(440-20*placed, 255);
+					placed++;
+				}
+			}
+		}
+		else{
+			ImageIcon bg = new ImageIcon("BattleBG2.png");
+			background = bg.getImage();
+		}
+		battleMenu.setVisible(true);
 	}
 
 	public void keyReleased(KeyEvent e){
