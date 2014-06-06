@@ -17,11 +17,12 @@ public class Player {
 	private static int ySize = 50;
 	private boolean inCombat = false;
 	private Rectangle overworldCollision = new Rectangle(xPos, yPos, 20, 50);
-	private static int MOVE_DISTANCE = 10;
+	private static int MOVE_DISTANCE = 2;
 
 	//Battle
 	int maxhp = 12;
 	int hp;
+	int stamina = 1000;
 	
 	public Player(){
 		xPos = 390;
@@ -117,25 +118,26 @@ public class Player {
 			g.drawLine(xPos + 15, yPos + 35, xPos + 5, yPos + 45);
 			
 		}
-		
-		if (inCombat){
-			//Health
-			g.setFont(new Font("Bell MT", Font.BOLD, 20));
-			FontMetrics metrics = g.getFontMetrics(new Font("Bell MT", Font.BOLD, 20));
-			int hgt = metrics.getHeight();
-			int adv = metrics.stringWidth(hp+"/"+maxhp);
-			g.setColor(Color.BLACK);	
-			g.fillRect(xPos-xSize-2, yPos-50, xSize*3+6, 44); 
-			g.setColor(Color.DARK_GRAY);	
-			g.fillRect(xPos-xSize, yPos-40, xSize*3, 12); 
-			g.setColor(Color.WHITE);
-			g.drawString(hp+"/"+maxhp, xPos-xSize-adv, yPos-40+hgt);
-			
-			
-			//Stamina
-			g.setColor(Color.DARK_GRAY);
-			g.fillRect(xPos-xSize, yPos-20, xSize*3, 12);
-		}
+	}
+	
+	public int getHealth(int x){
+		hp += x;
+		if (hp > maxhp)
+			hp = maxhp;
+		return hp;
+	}
+	
+	public int getMaxHealth(int x){
+		maxhp += x;
+		hp += x;
+		return maxhp;
+	}
+	
+	public int getStamina(int x){
+		stamina += x;
+		if (stamina > 1000)
+			stamina = 1000;
+		return stamina;
 	}
 
 }
