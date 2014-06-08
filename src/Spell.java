@@ -3,8 +3,8 @@ import java.awt.*;
 
 public class Spell {
 
-	private int xPos;
-	private int yPos;
+	private float xPos;
+	private float yPos;
 	private int xSize;
 	private int ySize;
 	private Color color;
@@ -14,14 +14,19 @@ public class Spell {
 	private int damage = 0;
 	private String effect = "None";
 	private boolean particle = true;
+	private static final int OUTLINE_SIZE = 2;
+	private int velocity = 5;
+	private float xVelocity;
+	private float yVelocity;
 	
-	public Spell(int type, int xO, int yO, int xF, int yF, int ID){
+	public Spell(int type, int xOrigin, int yOrigin, int xF, int yF, int ID){
 		spellType(type);
-		xPos = xO-xSize/2;
-		yPos = yO-ySize/2;
+		xPos = xOrigin-xSize/2;
+		yPos = yOrigin-ySize/2;
 		xTarget = xF-xSize/2;
 		yTarget = yF-ySize/2;
 		targetID = ID;
+		determineComponentVelocities();
 	}
 	
 	public void spellType(int t){
@@ -33,17 +38,24 @@ public class Spell {
 		}
 	}
 	
+	public void determineComponentVelocities() {
+		// Calculate how fast this spell will travel on the x and y axes.
+		float xDistance = xTarget - xPos;
+		float yDistance = yTarget - yPos;
+		float totalDistance = Math.abs(xDistance) + Math.abs(yDistance);
+		xVelocity = (xDistance / totalDistance) * velocity;
+		yVelocity = (yDistance / totalDistance) * velocity;
+	}
+	
 	public void move(){
-		int moveloop;
-		for (moveloop = 0; moveloop < 5  && !spellHit(); moveloop++){
-			if (xPos < xTarget)
-				xPos++;
-			else if (xPos > xTarget)
-				xPos--;
-			if (yPos < yTarget)
-				yPos++;
-			else if (yPos > yTarget)
-				yPos--;
+		if (Math.abs(xTarget - xPos) < Math.abs(xVelocity) && 
+			Math.abs(yTarget - yPos) < Math.abs(yVelocity)) {
+			System.out.println("Hit Target!");
+			xPos = xTarget;
+			yPos = yTarget;
+		} else {
+			xPos += xVelocity;
+			yPos += yVelocity;
 		}
 	}
 	
@@ -63,9 +75,12 @@ public class Spell {
 	}
 	
 	public void drawSpell(Graphics g){
-		g.setColor(Color.BLACK);
-		g.fillOval(xPos-2, yPos-2, xSize+4, ySize+4);
+		// Draw Outline first
+		Graphics2D g2 = (Graphics2D) g;
+		g2.setStroke(new BasicStroke(OUTLINE_SIZE));
+		
+		// Draw the interior of the spell
 		g.setColor(color);
-		g.fillOval(xPos, yPos, xSize, ySize);
+		g.fillOval((int) xPos, (int) yPos, xSize, ySize);
 	}
 }
