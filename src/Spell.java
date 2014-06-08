@@ -13,7 +13,7 @@ public class Spell {
 	private int yTarget;
 	private int damage = 0;
 	private String effect = "None";
-	private boolean particle = true;
+	private boolean particle;
 	
 	public Spell(int type, int xO, int yO, int xF, int yF, int ID){
 		spellType(type);
@@ -27,9 +27,10 @@ public class Spell {
 	public void spellType(int t){
 		if (t == 0){
 			color = new Color (102, 51, 0);
-			damage = 30;
+			damage = 3;
 			xSize = 16;
 			ySize = 16;
+			particle = true;
 		}
 	}
 	
@@ -62,10 +63,16 @@ public class Spell {
 		return damage;
 	}
 	
+	public String getEffect(){
+		return effect;
+	}
+	
 	public void drawSpell(Graphics g){
-		g.setColor(Color.BLACK);
-		g.fillOval(xPos-2, yPos-2, xSize+4, ySize+4);
-		g.setColor(color);
-		g.fillOval(xPos, yPos, xSize, ySize);
+		if (particle){
+			g.setColor(Color.BLACK);
+			g.fillOval(xPos-2, yPos-2, xSize+4, ySize+4);
+			g.setColor(color);
+			g.fillOval(xPos, yPos, xSize, ySize);
+		}
 	}
 }

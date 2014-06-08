@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class HotSMain extends JPanel implements ActionListener, MouseListener, MouseMotionListener, KeyListener{
 	
 	//General
-	private int scene = 2;
+	private int scene = OVERWORLD;
 	private static int TITLE = 0;
 	private static int PROLOGUE = 1;
 	private static int OVERWORLD = 2;
@@ -42,7 +42,6 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	private JButton dataButton = new JButton("Data");
 	
 	//Battle
-	ArrayList<Integer> combativeEnemies = new ArrayList<Integer>();	
 	private int battleBG;
 	ArrayList<Spell> spellsThrown = new ArrayList<Spell>();
 	private Rectangle throwAcorn = new Rectangle(20, 500, 130, 30);
@@ -94,7 +93,7 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	public void actionPerformed(ActionEvent a){
 		Object source = a.getSource();
 		
-		if (scene == 2){
+		if (scene == OVERWORLD){
 			if (source == timer){
 				if (moveUp && !moveDown)
 					player.moveUp();
@@ -121,7 +120,7 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 				dataButton.setText("DATA");
 			
 		}
-		if (scene == 4){
+		if (scene == BATTLE){
 			if (source == timer){
 				int loop;
 				for (loop = 0; loop < spellsThrown.size(); loop++){
@@ -137,7 +136,7 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 		repaint();
 		
 		//To check collision
-		if (scene == 2){
+		if (scene == OVERWORLD){
 			int loop;
 			for (loop = 0; loop < enemies.size(); loop++){
 				if (enemies.get(loop).hitbox().intersects(player.hitbox())){
@@ -158,10 +157,12 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	}
 	
 	public void mouseClicked(MouseEvent e){
-		if (scene == 4){
-			int target = 0;
-			if (throwAcorn.contains(mX, mY)){
-				spellsThrown.add(new Spell(0, player.centerX(), player.centerY(), enemies.get(target).centerX(), enemies.get(target).centerY(), target));
+		if (scene == BATTLE){
+			if (!battleWon){
+				int target = 0;
+				if (throwAcorn.contains(mX, mY)){
+					spellsThrown.add(new Spell(0, player.centerX(), player.centerY(), enemies.get(target).centerX(), enemies.get(target).centerY(), target));
+				}
 			}
 		}
 	}
@@ -173,7 +174,7 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	public void keyPressed(KeyEvent e){
 		int keyID = e.getKeyCode();
 		
-		if (scene == 2){
+		if (scene == OVERWORLD){
 			if (keyID == KeyEvent.VK_UP || keyID == KeyEvent.VK_W){
 				moveUp = true;
 			}
@@ -203,7 +204,7 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 			}
 		}
 		
-		else if (scene == 4){
+		else if (scene == BATTLE){
 			if ((keyID == KeyEvent.VK_ENTER || keyID == KeyEvent.VK_SPACE) && battleWon) {
 				if (player.levelUp()){
 					nextWindow = true;
@@ -219,7 +220,7 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	public void keyReleased(KeyEvent e){
 		int keyID = e.getKeyCode();
 		
-		if (scene == 2){
+		if (scene == OVERWORLD){
 			if (keyID == KeyEvent.VK_UP || keyID == KeyEvent.VK_W){
 				moveUp = false;
 			}
@@ -237,7 +238,7 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	
 	//Transitions from Overworld to Battle scene
 	public void battleBegin(){
-		scene = 4;
+		scene = BATTLE;
 		moveUp = false;
 		moveDown = false;
 		moveLeft = false;
@@ -280,7 +281,7 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	
 	//Draws the Battle Menu
 	public void drawMenu(Graphics g){
-		if (scene == 4){
+		if (scene == BATTLE){
 			//Background
 			g.setColor(Color.GREEN);
 			g.fillRect(0, 450, 800, 150);
@@ -315,7 +316,7 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	}
 	
 	public void checkEnemyPresence(){
-		if (scene == 4){
+		if (scene == BATTLE){
 			int loop;
 			int deadCounter = 0;
 			for (loop = 0; loop < enemies.size(); loop++){
@@ -330,6 +331,8 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	
 	public void victory(){
 		battleWon = true;
+		player.expGain(totalExperience);
+		enemies.removeAll(enemies);
 	}
 	
 	public void drawVictory(Graphics g){
@@ -343,10 +346,10 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 			FontMetrics metrics = g.getFontMetrics(new Font("Bell MT", Font.BOLD, 20));
 			int hgt = metrics.getHeight();
 			//Hgt = 26
-			int adv = metrics.stringWidth(player.getName()+ " is now level "+player.getLevel()+"!");
+			int adv = metrics.stringWidth("You have gotten stronger.");
+			g.drawString("You have gotten stronger.", getWidth()/2-adv/2, 269+hgt);
+			adv = metrics.stringWidth(player.getName()+ " is now level "+player.getLevel()+"!");
 			g.drawString(player.getName()+ " is now level "+player.getLevel()+"!", getWidth()/2-adv/2, 234+hgt);
-			adv = metrics.stringWidth("+2 skill points");
-			g.drawString("You and your allies gain "+totalExperience+" experience!", getWidth()/2-adv/2, 269+hgt);
 		}
 		else{
 			g.setColor(new Color(0, 0, 0, 200));
@@ -366,9 +369,12 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	}
 	
 	public void battleEnd(){
-		scene = 2;
-		ImageIcon bg = new ImageIcon("Overworld.jpg");
+		scene = OVERWORLD;
+		ImageIcon bg = new ImageIcon("OverworldBG.jpg");
 		background = bg.getImage();
+		player.battleEnd();
+		totalExperience = 0;
+		battleWon = false;
 	}
 	
 	public void keyTyped(KeyEvent e){
@@ -386,9 +392,9 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	
 	public void paintComponent(Graphics g){
 		super.paintComponent(g);
-		if (scene == 2)
+		if (scene == OVERWORLD)
 			g.drawImage(background, 0, 0, this);
-		if (scene == 4){
+		if (scene == BATTLE){
 			if (battleBG == 1)
 				g.drawImage(background, 0, -130, this);
 			else
@@ -396,10 +402,10 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 		}
 		int loop;
 		for (loop = 0; loop < enemies.size(); loop++){
-			if (scene == 2){
+			if (scene == OVERWORLD){
 				enemies.get(loop).drawEnemy(g);
 			}
-			if (scene == 4){
+			if (scene == BATTLE){
 				if (enemies.get(loop).getActivity()){
 					enemies.get(loop).drawEnemy(g);
 				}
@@ -409,7 +415,7 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 			spellsThrown.get(loop).drawSpell(g);
 		}
 		player.drawPlayer(g);
-		if (scene == 4){
+		if (scene == BATTLE){
 			drawMenu(g);
 			if (battleWon)
 				drawVictory(g);

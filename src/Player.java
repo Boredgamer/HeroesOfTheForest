@@ -18,6 +18,8 @@ public class Player {
 	private boolean inCombat = false;
 	private Rectangle overworldCollision = new Rectangle(xPos, yPos, 20, 50);
 	private static int MOVE_DISTANCE = 2;
+	private int xOverworld;
+	private int yOverworld;
 
 	//Battle
 	private int maxhp = 12;
@@ -44,6 +46,8 @@ public class Player {
 	}
 	
 	public void battleBegin(int x, int y){
+		xOverworld = xPos;
+		yOverworld = yPos;
 		xPos = x-xSize/2;
 		yPos = y-ySize/2;
 	}
@@ -78,6 +82,11 @@ public class Player {
 			yPos = 550; 
 		}
 		overworldCollision = new Rectangle(xPos, yPos, xSize, ySize);
+	}
+	
+	public void battleEnd(){
+		xPos = xOverworld;
+		yPos = yOverworld;
 	}
 	
 	//Battle
@@ -117,12 +126,14 @@ public class Player {
 		if (experience + expToGive >= expToLevel){
 			expToGive -= expToLevel - experience;
 			experience = expToLevel;
-			expToLevel *= 3/2;
 			level++;
+			//ExpToLevel Change
+			expToLevel *= level;
 			return true;
 		}
 		else{
 			experience += expToGive;
+			expToGive = 0;
 			return false;
 		}
 	}
