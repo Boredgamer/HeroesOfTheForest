@@ -333,6 +333,7 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 		battleWon = true;
 		player.expGain(totalExperience);
 		enemies.removeAll(enemies);
+		spellsThrown.removeAll(spellsThrown);
 	}
 	
 	public void drawVictory(Graphics g){
