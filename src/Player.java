@@ -20,9 +20,13 @@ public class Player {
 	private static int MOVE_DISTANCE = 2;
 
 	//Battle
-	int maxhp = 12;
-	int hp;
-	int stamina = 1000;
+	private int maxhp = 12;
+	private int hp;
+	private int stamina = 1000;
+	private int level = 1;
+	private int experience = 0;
+	private int expToLevel = 150;
+	private int expToGive = 0;
 	
 	public Player(){
 		xPos = 390;
@@ -30,34 +34,7 @@ public class Player {
 		hp = maxhp;
 	}
 	
-	public void setGender(boolean b){
-		isMale = b;
-	}
-	
-	public void setSkinColor(Color c){
-		skin = c;
-	}
-	
-	public void setHairColor(Color c){
-		hair = c;
-	}
-	
-	public void setName(String s){
-		name = s;
-	}
-	
-	public void setEmblem(int e){
-		emblem = e;
-	}
-	
-	public void defaultPlayer(){
-		isMale = true;
-		skin = new Color(253, 243, 179);
-		hair = Color.BLACK;
-		name = "Levin";
-		emblem = 0;
-	}
-	
+	//Overworld
 	public Rectangle hitbox(){
 		return overworldCollision;
 	}
@@ -102,7 +79,100 @@ public class Player {
 		}
 		overworldCollision = new Rectangle(xPos, yPos, xSize, ySize);
 	}
-		
+	
+	//Battle
+	public int getHealth(int x){
+		hp -= x;
+		if (hp > maxhp)
+			hp = maxhp;
+		else if (hp <= 0)
+			death();
+		return hp;
+	}
+	
+	public int getMaxHealth(int x){
+		maxhp += x;
+		hp += x;
+		return maxhp;
+	}
+	
+	public void staminaGain(int x){
+		stamina += x;
+		if (stamina > 1000)
+			stamina = 1000;
+	}
+	
+	public int getStamina(){
+		return stamina/10;
+	}
+	
+	public void death(){	
+	}
+	
+	public void expGain(int x){
+		expToGive = x;
+	}
+	
+	public boolean levelUp(){
+		if (experience + expToGive >= expToLevel){
+			expToGive -= expToLevel - experience;
+			experience = expToLevel;
+			expToLevel *= 3/2;
+			level++;
+			return true;
+		}
+		else{
+			experience += expToGive;
+			return false;
+		}
+	}
+	
+	public int getLevel(){
+		return level;
+	}
+	
+	public String getName(){
+		return name;
+	}
+	
+	public int centerX(){
+		return xPos + xSize/2;
+	}
+
+	public int centerY(){
+		return yPos +ySize/2;
+	}
+	
+	//Details
+	public void setGender(boolean b){
+		isMale = b;
+	}
+	
+	public void setSkinColor(Color c){
+		skin = c;
+	}
+	
+	public void setHairColor(Color c){
+		hair = c;
+	}
+	
+	public void setName(String s){
+		name = s;
+	}
+	
+	public void setEmblem(int e){
+		emblem = e;
+	}
+	
+	public void defaultPlayer(){
+		isMale = true;
+		skin = new Color(253, 243, 179);
+		hair = Color.BLACK;
+		name = "Levin";
+		emblem = 0;
+	}
+	
+	
 	public void drawPlayer(Graphics g){
 		Graphics2D g2 = (Graphics2D) g;
 		g.setColor(skin);
@@ -119,25 +189,4 @@ public class Player {
 			
 		}
 	}
-	
-	public int getHealth(int x){
-		hp += x;
-		if (hp > maxhp)
-			hp = maxhp;
-		return hp;
-	}
-	
-	public int getMaxHealth(int x){
-		maxhp += x;
-		hp += x;
-		return maxhp;
-	}
-	
-	public int getStamina(int x){
-		stamina += x;
-		if (stamina > 1000)
-			stamina = 1000;
-		return stamina;
-	}
-
 }

@@ -18,15 +18,13 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	private static int BATTLE = 4;
 	
 	private Timer timer = new Timer(10, this);
-	
 	private Player player;
 	ArrayList<Enemy> enemies = new ArrayList<Enemy>();
-
 	private JFrame frame = new JFrame();
-	
 	private Container canvas = frame.getContentPane();
-	
 	private Image background;
+	private int mX;
+	private int mY;
 	
 	//Overworld
 	private boolean moveUp = false;
@@ -46,6 +44,11 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	//Battle
 	ArrayList<Integer> combativeEnemies = new ArrayList<Integer>();	
 	private int battleBG;
+	ArrayList<Spell> spellsThrown = new ArrayList<Spell>();
+	private Rectangle throwAcorn = new Rectangle(20, 500, 130, 30);
+	private boolean battleWon;
+	private int totalExperience = 0;
+	private boolean nextWindow = false;
 	
 	public HotSMain(){
 		//General
@@ -83,6 +86,8 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 		enemies.add(new Stalker(375, 200));
 		player.defaultPlayer();
 		frame.addKeyListener(this);
+		frame.addMouseListener(this);
+		frame.addMouseMotionListener(this);
 		timer.start();
 	}
 	
@@ -116,6 +121,19 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 				dataButton.setText("DATA");
 			
 		}
+		if (scene == 4){
+			if (source == timer){
+				int loop;
+				for (loop = 0; loop < spellsThrown.size(); loop++){
+					spellsThrown.get(loop).move();
+					if (spellsThrown.get(loop).spellHit()){
+						enemies.get(spellsThrown.get(loop).getTarget()).getHealth(spellsThrown.get(loop).getDamage());
+						spellsThrown.remove(loop);
+						checkEnemyPresence();
+					}
+				}	
+			}
+		}
 		repaint();
 		
 		//To check collision
@@ -135,9 +153,17 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	}
 	
 	public void mouseMoved(MouseEvent e){
+		mX = e.getX();
+		mY = e.getY();	
 	}
 	
 	public void mouseClicked(MouseEvent e){
+		if (scene == 4){
+			int target = 0;
+			if (throwAcorn.contains(mX, mY)){
+				spellsThrown.add(new Spell(0, player.centerX(), player.centerY(), enemies.get(target).centerX(), enemies.get(target).centerY(), target));
+			}
+		}
 	}
 	
 	public void mousePressed(MouseEvent e){
@@ -176,73 +202,20 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 				}
 			}
 		}
+		
+		else if (scene == 4){
+			if ((keyID == KeyEvent.VK_ENTER || keyID == KeyEvent.VK_SPACE) && battleWon) {
+				if (player.levelUp()){
+					nextWindow = true;
+				}
+				else{
+					battleEnd();
+				}
+			}
+		}
 		repaint();
 	}
 	
-	public void battleBegin(){
-		scene = 4;
-		timer.stop();
-		moveUp = false;
-		moveDown = false;
-		moveLeft = false;
-		moveRight = false;
-		
-		//Background changer
-		int bgSelector = (int)(1*Math.random()+1);
-		if (bgSelector > 5){
-			ImageIcon bg = new ImageIcon("BattleBG1.jpg");
-			background = bg.getImage();
-			battleBG = 1;
-			player.battleBegin(235, 380);
-			int placed = 0;
-			int loop;
-			for (loop = 0; loop < enemies.size(); loop++){
-				if (enemies.get(loop).getActivity()){
-					enemies.get(loop).battleBegin(440-20*placed, 125);
-					placed++;
-				}
-			}
-		}
-		else{
-			ImageIcon bg = new ImageIcon("BattleBG2.png");
-			background = bg.getImage();
-			battleBG = 2;
-			player.battleBegin(650, 365);
-			int placed = 0;
-			int loop;
-			for (loop = 0; loop < enemies.size(); loop++){
-				if (enemies.get(loop).getActivity()){
-					enemies.get(loop).battleBegin(340-20*placed, 145);
-					placed++;
-				}
-			}
-		}
-		menuScreen.setVisible(false);
-	}
-	
-	public void drawMenu(Graphics g){
-		//Background
-		g.setColor(Color.GREEN);
-		g.fillRect(0, 450, 800, 150);
-		g.setColor(Color.BLACK);
-		g.fillRect(10, 460, 780, 130);
-		
-		//Player
-		//Health
-		g.setColor(Color.WHITE);
-		g.setFont(new Font("Bell MT", Font.BOLD, 20));
-		FontMetrics metrics = g.getFontMetrics(new Font("Bell MT", Font.BOLD, 20));
-		int hgt = metrics.getHeight();
-		int adv = metrics.stringWidth(player.getHealth(0)+"/"+player.getMaxHealth(0));	
-		//Adv = 50; Hgt = 26
-		g.drawString(player.getHealth(0)+"/"+player.getMaxHealth(0), getWidth()-adv-180, 461+hgt);		
-		g.setColor(Color.DARK_GRAY);
-		g.fillRect(getWidth()-170, 470, 150, hgt-6);
-		
-		//Stamina
-		g.fillRect(getWidth()-170, 500, 150, hgt-6);
-	}
-
 	public void keyReleased(KeyEvent e){
 		int keyID = e.getKeyCode();
 		
@@ -260,6 +233,142 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 				moveRight = false;
 			}
 		}
+	}
+	
+	//Transitions from Overworld to Battle scene
+	public void battleBegin(){
+		scene = 4;
+		moveUp = false;
+		moveDown = false;
+		moveLeft = false;
+		moveRight = false;
+		
+		//Background changer
+		int bgSelector = (int)(10*Math.random()+1);
+		if (bgSelector > 5){
+			ImageIcon bg = new ImageIcon("BattleBG1.jpg");
+			background = bg.getImage();
+			battleBG = 1;
+			player.battleBegin(235, 380);
+			int placed = 0;
+			int loop;
+			for (loop = 0; loop < enemies.size(); loop++){
+				if (enemies.get(loop).getActivity()){
+					enemies.get(loop).battleBegin(440-20*placed, 125);
+					placed++;
+					totalExperience += enemies.get(loop).getEXP();
+				}
+			}
+		}
+		else{
+			ImageIcon bg = new ImageIcon("BattleBG2.png");
+			background = bg.getImage();
+			battleBG = 2;
+			player.battleBegin(650, 365);
+			int placed = 0;
+			int loop;
+			for (loop = 0; loop < enemies.size(); loop++){
+				if (enemies.get(loop).getActivity()){
+					enemies.get(loop).battleBegin(340-20*placed, 145);
+					placed++;
+					totalExperience += enemies.get(loop).getEXP();
+				}
+			}
+		}
+		menuScreen.setVisible(false);
+	}
+	
+	//Draws the Battle Menu
+	public void drawMenu(Graphics g){
+		if (scene == 4){
+			//Background
+			g.setColor(Color.GREEN);
+			g.fillRect(0, 450, 800, 150);
+			g.setColor(Color.BLACK);
+			g.fillRect(10, 460, 780, 130);
+			
+			//Player
+			//Health
+			g.setColor(Color.WHITE);
+			g.setFont(new Font("Bell MT", Font.BOLD, 20));
+			FontMetrics metrics = g.getFontMetrics(new Font("Bell MT", Font.BOLD, 20));
+			int hgt = metrics.getHeight();
+			//Hgt = 26
+			int adv = metrics.stringWidth(player.getHealth(0)+"/"+player.getMaxHealth(0));
+			g.drawString(player.getHealth(0)+"/"+player.getMaxHealth(0), getWidth()-adv-180, 461+hgt);		
+			g.setColor(Color.DARK_GRAY);
+			g.fillRect(getWidth()-170, 470, 150, hgt-6);
+			
+			//Stamina
+			g.fillRect(getWidth()-170, 500, 150, hgt-6);
+			adv = metrics.stringWidth(player.getStamina()+"%");	
+			g.setColor(Color.WHITE);
+			g.drawString(player.getStamina()+"%", getWidth()-adv-180, 491+hgt);
+			
+			//Spell Tester
+			adv = metrics.stringWidth("Throw acorn");
+			g.setColor(Color.DARK_GRAY);
+			g.fillRect(20, 470, adv+10, 30);
+			g.setColor(Color.WHITE);
+			g.drawString("Throw Acorn", 25, 492);
+		}
+	}
+	
+	public void checkEnemyPresence(){
+		if (scene == 4){
+			int loop;
+			int deadCounter = 0;
+			for (loop = 0; loop < enemies.size(); loop++){
+				if (enemies.get(loop).getDeath())
+					deadCounter++;
+			}
+			if (deadCounter == enemies.size()){
+				victory();
+			}
+		}
+	}
+	
+	public void victory(){
+		battleWon = true;
+	}
+	
+	public void drawVictory(Graphics g){
+		if (nextWindow){
+			g.setColor(new Color(0, 0, 0, 200));
+			g.fillRect(195, 220, 410, 110);
+			g.setColor(new Color(255, 255, 255, 200));
+			g.fillRect(200, 225, 400, 100);
+			g.setColor(new Color(0, 0, 0, 200));
+			g.setFont(new Font("Bell MT", Font.BOLD, 20));
+			FontMetrics metrics = g.getFontMetrics(new Font("Bell MT", Font.BOLD, 20));
+			int hgt = metrics.getHeight();
+			//Hgt = 26
+			int adv = metrics.stringWidth(player.getName()+ " is now level "+player.getLevel()+"!");
+			g.drawString(player.getName()+ " is now level "+player.getLevel()+"!", getWidth()/2-adv/2, 234+hgt);
+			adv = metrics.stringWidth("+2 skill points");
+			g.drawString("You and your allies gain "+totalExperience+" experience!", getWidth()/2-adv/2, 269+hgt);
+		}
+		else{
+			g.setColor(new Color(0, 0, 0, 200));
+			g.fillRect(195, 220, 410, 110);
+			g.setColor(new Color(255, 255, 255, 200));
+			g.fillRect(200, 225, 400, 100);
+			g.setColor(new Color(0, 0, 0, 200));
+			g.setFont(new Font("Bell MT", Font.BOLD, 20));
+			FontMetrics metrics = g.getFontMetrics(new Font("Bell MT", Font.BOLD, 20));
+			int hgt = metrics.getHeight();
+			//Hgt = 26
+			int adv = metrics.stringWidth("You survived!");
+			g.drawString("You survived!", getWidth()/2-adv/2, 234+hgt);
+			adv = metrics.stringWidth("You and your allies gain "+totalExperience+" experience!");
+			g.drawString("You and your allies gain "+totalExperience+" experience!", getWidth()/2-adv/2, 269+hgt);
+		}
+	}
+	
+	public void battleEnd(){
+		scene = 2;
+		ImageIcon bg = new ImageIcon("Overworld.jpg");
+		background = bg.getImage();
 	}
 	
 	public void keyTyped(KeyEvent e){
@@ -296,9 +405,14 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 				}
 			}
 		}
+		for (loop = 0; loop < spellsThrown.size(); loop++){
+			spellsThrown.get(loop).drawSpell(g);
+		}
 		player.drawPlayer(g);
 		if (scene == 4){
 			drawMenu(g);
+			if (battleWon)
+				drawVictory(g);
 		}
 	}
 
