@@ -50,7 +50,6 @@ public class Spell {
 	public void move(){
 		if (Math.abs(xTarget - xPos) < Math.abs(xVelocity) && 
 			Math.abs(yTarget - yPos) < Math.abs(yVelocity)) {
-			System.out.println("Hit Target!");
 			xPos = xTarget;
 			yPos = yTarget;
 		} else {
