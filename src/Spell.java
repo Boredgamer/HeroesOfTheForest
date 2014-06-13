@@ -2,6 +2,8 @@ import java.awt.*;
 
 
 public class Spell {
+	
+	private static int BASIC = 0;
 
 	private float xPos;
 	private float yPos;
@@ -14,13 +16,14 @@ public class Spell {
 	private int damage = 0;
 	private String effect = "None";
 	private boolean particle = true;
-	private static final int OUTLINE_SIZE = 4;
+	private static final int OUTLINE_SIZE = 2;
 	private int velocity = 5;
 	private float xVelocity;
 	private float yVelocity;
 	
-	public Spell(int type, int xOrigin, int yOrigin, int xF, int yF, int ID){
+	public Spell(int type, Color c, int xOrigin, int yOrigin, int xF, int yF, int ID){
 		spellType(type);
+		color = c;
 		xPos = xOrigin-xSize/2;
 		yPos = yOrigin-ySize/2;
 		xTarget = xF-xSize/2;
@@ -30,11 +33,10 @@ public class Spell {
 	}
 	
 	public void spellType(int t){
-		if (t == 0){
-			color = new Color (102, 51, 0);
+		if (t == BASIC){
 			damage = 3;
-			xSize = 16;
-			ySize = 16;
+			xSize = 14;
+			ySize = 14;
 			particle = true;
 		}
 	}
@@ -79,14 +81,16 @@ public class Spell {
 	}
 	
 	public void drawSpell(Graphics g){
-		// Draw Outline first
-		g.setColor(Color.BLACK);
-		Graphics2D g2 = (Graphics2D) g;
-		g2.setStroke(new BasicStroke(OUTLINE_SIZE));
-		g.drawOval((int) xPos, (int) yPos, xSize, ySize);
-		
-		// Draw the interior of the spell
-		g.setColor(color);
-		g.fillOval((int) xPos, (int) yPos, xSize, ySize);
+		if (particle){
+			// Draw Outline first
+			g.setColor(Color.BLACK);
+			Graphics2D g2 = (Graphics2D) g;
+			g2.setStroke(new BasicStroke(OUTLINE_SIZE));
+			g.drawOval((int) xPos, (int) yPos, xSize, ySize);
+			
+			// Draw the interior of the spell
+			g.setColor(color);
+			g.fillOval((int) xPos, (int) yPos, xSize, ySize);
+		}
 	}
 }

@@ -24,7 +24,9 @@ public class Player {
 	//Battle
 	private int maxhp = 12;
 	private int hp;
-	private int stamina = 1000;
+	private int healthBlinker = 0;
+	private boolean dead = false;
+	private int stamina = 0;
 	private int level = 1;
 	private int experience = 0;
 	private int expToLevel = 150;
@@ -87,6 +89,7 @@ public class Player {
 	public void battleEnd(){
 		xPos = xOverworld;
 		yPos = yOverworld;
+		stamina = 0;
 	}
 	
 	//Battle
@@ -94,8 +97,10 @@ public class Player {
 		hp -= x;
 		if (hp > maxhp)
 			hp = maxhp;
-		else if (hp <= 0)
+		else if (hp <= 0){
+			hp = 0;
 			death();
+		}
 		return hp;
 	}
 	
@@ -105,17 +110,33 @@ public class Player {
 		return maxhp;
 	}
 	
+	public Color getLowHealth(){
+		healthBlinker++;
+		if (healthBlinker <= 20 || dead)
+			return Color.WHITE;
+		else{
+			if (healthBlinker == 40)
+				healthBlinker = 0;
+			return Color.RED;
+		}
+	}
+	
 	public void staminaGain(int x){
 		stamina += x;
 		if (stamina > 1000)
 			stamina = 1000;
 	}
 	
-	public int getStamina(){
+	public double getStamina(){
 		return stamina/10;
 	}
 	
 	public void death(){	
+		dead = true;
+	}
+	
+	public boolean getDeath(){
+		return dead;
 	}
 	
 	public void expGain(int x){
@@ -185,19 +206,37 @@ public class Player {
 	
 	
 	public void drawPlayer(Graphics g){
-		Graphics2D g2 = (Graphics2D) g;
-		g.setColor(skin);
-		g.fillRect(xPos, yPos, xSize, ySize);
-		g.setColor(hair);
-		g.fillRect(xPos, yPos, xSize, 15);
-		
-		g.setColor(Color.BLACK);
-		if (emblem == 0){
-			g2.setStroke(new BasicStroke(2));
-			g.drawLine(xPos + 15, yPos + 25, xPos + 5, yPos + 35);
-			g.drawLine(xPos + 5, yPos + 35, xPos + 15, yPos + 35);
-			g.drawLine(xPos + 15, yPos + 35, xPos + 5, yPos + 45);
+		if (!dead){
+			Graphics2D g2 = (Graphics2D) g;
+			g.setColor(skin);
+			g.fillRect(xPos, yPos, xSize, ySize);
+			g.setColor(hair);
+			g.fillRect(xPos, yPos, xSize, 15);
 			
+			g.setColor(Color.BLACK);
+			if (emblem == 0){
+				g2.setStroke(new BasicStroke(2));
+				g.drawLine(xPos + 15, yPos + 25, xPos + 5, yPos + 35);
+				g.drawLine(xPos + 5, yPos + 35, xPos + 15, yPos + 35);
+				g.drawLine(xPos + 15, yPos + 35, xPos + 5, yPos + 45);
+				
+			}
+		}
+		else{
+			Graphics2D g2 = (Graphics2D) g;
+			g.setColor(skin);
+			g.fillRect(xPos-(ySize-xSize), yPos+xSize, ySize, xSize);
+			g.setColor(hair);
+			g.fillRect(xPos-(ySize-xSize), yPos+xSize, 15, xSize);
+			
+			g.setColor(Color.BLACK);
+			if (emblem == 0){
+				g2.setStroke(new BasicStroke(2));
+				g.drawLine(xPos-(ySize-xSize) + 25, yPos+xSize + 15, xPos-(ySize-xSize) + 35, yPos+xSize + 5);
+				g.drawLine(xPos-(ySize-xSize) + 35, yPos+xSize + 5, xPos-(ySize-xSize) + 35, yPos+xSize + 15);
+				g.drawLine(xPos-(ySize-xSize) + 35, yPos+xSize + 15, xPos-(ySize-xSize) + 45, yPos+xSize + 5);
+				
+			}
 		}
 	}
 }

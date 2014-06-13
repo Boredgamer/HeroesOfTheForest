@@ -22,11 +22,26 @@ public class Stalker extends Enemy {
 		exp = 500;
 	}
 	
+	public void attack(int x, int y){
+		stamina++;
+		if (stamina == 30){
+			int target = 0;
+			spellsThrown.add(new Spell(0, Color.DARK_GRAY, centerX(), centerY(), x, y, target));
+			stamina = 0;
+		}
+		int loop;
+		for (loop = 0; loop < spellsThrown.size(); loop++){
+			spellsThrown.get(loop).move();
+		}
+	}
+	
 	public void drawEnemy(Graphics g){
 		if (!dead){
 			//Body
-			g.setColor(Color.LIGHT_GRAY);
+			g.setColor(Color.BLACK);
 			g.fillRect(xPos, yPos, SIZE, SIZE);
+			g.setColor(new Color(210, 210, 210));
+			g.fillRect(xPos+2, yPos+2, SIZE-4, SIZE-4);
 			
 			//Scar
 			Graphics2D g2 = (Graphics2D) g;

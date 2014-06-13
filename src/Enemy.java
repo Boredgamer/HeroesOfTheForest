@@ -1,5 +1,6 @@
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.util.ArrayList;
 
 
 public class Enemy {
@@ -14,6 +15,8 @@ public class Enemy {
 	protected int hp;
 	protected boolean dead = false;
 	protected int exp;
+	protected ArrayList<Spell> spellsThrown = new ArrayList<Spell>();
+	protected int stamina = 0;
 	
 	public Enemy(int x, int y) {
 	}
@@ -23,6 +26,13 @@ public class Enemy {
 	}
 
 	public void drawEnemy(Graphics g){
+	}
+	
+	public void drawSpells(Graphics g){
+		int loop;
+		for (loop = 0; loop < spellsThrown.size(); loop++){
+			spellsThrown.get(loop).drawSpell(g);
+		}
 	}
 	
 	//Overworld
@@ -40,6 +50,9 @@ public class Enemy {
 	}
 	
 	//Battle
+	public void attack(int x, int y){
+	}
+	
 	public int getHealth(int x){
 		hp -= x;
 		if (hp > maxhp)
