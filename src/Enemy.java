@@ -16,8 +16,7 @@ public class Enemy extends Character {
 	protected int exp;
 	protected ArrayList<Spell> spellsThrown = new ArrayList<Spell>();
 	protected int stamina = 0;
-	protected String status = "None";
-	protected int statusRemover = 0;
+
 	
 	public Enemy(int x, int y) {
 	}

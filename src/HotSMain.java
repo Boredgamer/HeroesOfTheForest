@@ -133,6 +133,7 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 					spell.move();
 					if (spell.spellHit()){
 						enemies.get(spell.getTarget()).takeDamage(spell.getDamage());
+						enemies.get(spell.getTarget()).statusPresent(spell.getEffect());
 						spellsThrown.remove(spellNum);
 						checkEnemyPresence();
 					}
