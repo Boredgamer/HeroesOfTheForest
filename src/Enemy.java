@@ -53,7 +53,7 @@ public class Enemy {
 	public void attack(int x, int y){
 	}
 	
-	public int getHealth(int x){
+	public int takeDamage(int x){
 		hp -= x;
 		if (hp > maxhp)
 			hp = maxhp;
