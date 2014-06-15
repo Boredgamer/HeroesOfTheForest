@@ -4,7 +4,8 @@ import java.awt.*;
 public class Spell {
 	
 	private static int BASIC = 0;
-
+	private static int STUN = 1;
+	
 	private float xPos;
 	private float yPos;
 	private int xSize;
@@ -35,9 +36,14 @@ public class Spell {
 	public void spellType(int t){
 		if (t == BASIC){
 			damage = 3;
+			xSize = 10;
+			ySize = 10;
+		}
+		else if (t == STUN){
+			damage = 6;
 			xSize = 14;
 			ySize = 14;
-			particle = true;
+			effect = "Stun";
 		}
 	}
 	

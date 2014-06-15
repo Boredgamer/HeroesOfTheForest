@@ -22,12 +22,19 @@ public class Stalker extends Enemy {
 		exp = 500;
 	}
 	
-	public void attack(int x, int y){
-		stamina++;
-		if (stamina == 30){
-			int target = 0;
-			spellsThrown.add(new Spell(0, Color.DARK_GRAY, centerX(), centerY(), x, y, target));
-			stamina = 0;
+	public void attack(int x, int y, int s){
+		if (status != "Stun"){
+				stamina += s;
+			if (stamina >= 1000){
+				int target = 0;
+				spellsThrown.add(new Spell(0, Color.DARK_GRAY, centerX(), centerY(), x, y, target));
+				stamina = 0;
+			}
+		}
+		else{
+			statusRemover++;
+			if (statusRemover == 30)
+				status = "None";
 		}
 		int loop;
 		for (loop = 0; loop < spellsThrown.size(); loop++){
@@ -64,6 +71,14 @@ public class Stalker extends Enemy {
 			g.drawLine(xPos+10, yPos+10, xPos+20, yPos+20);
 			g.drawLine(xPos+28, yPos+20, xPos+40, yPos+10);
 			g2.setStroke(new BasicStroke(1));
+			
+			if (status == "Stun"){
+				g.setColor(Color.RED);
+				g2.setStroke(new BasicStroke(4));
+				g.drawLine(xPos, yPos-20, xPos+xSize, yPos-5);
+				g.drawLine(xPos, yPos-5, xPos+xSize, yPos-20);
+				
+			}
 		}
 		
 		else{

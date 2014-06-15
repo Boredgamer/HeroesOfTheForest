@@ -17,6 +17,8 @@ public class Enemy {
 	protected int exp;
 	protected ArrayList<Spell> spellsThrown = new ArrayList<Spell>();
 	protected int stamina = 0;
+	protected String status = "None";
+	protected int statusRemover = 0;
 	
 	public Enemy(int x, int y) {
 	}
@@ -50,7 +52,7 @@ public class Enemy {
 	}
 	
 	//Battle
-	public void attack(int x, int y){
+	public void attack(int x, int y, int s){
 	}
 	
 	public int getHealth(int x){
@@ -60,6 +62,13 @@ public class Enemy {
 		else if (hp <= 0)
 			death();
 		return hp;
+	}
+	
+	public void statusPresent(String s){
+		if (s == "Stun"){
+			statusRemover = 0;
+			status = "Stun";
+		}
 	}
 	
 	public void death(){

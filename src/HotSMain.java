@@ -46,7 +46,8 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	private int battleBG;
 	private Timer staminaTimer = new Timer(100, this);
 	ArrayList<Spell> spellsThrown = new ArrayList<Spell>();
-	private Rectangle hurlPebble = new Rectangle(20, 500, 130, 30);
+	private Rectangle kickDirt = new Rectangle(20, 500, 130, 30);
+	private Rectangle hurlPebble = new Rectangle(20, 540, 130, 30);
 	private boolean battleWon;
 	private boolean battleLost;
 	private int totalExperience = 0;
@@ -132,6 +133,7 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 					spellsThrown.get(loop).move();
 					if (spellsThrown.get(loop).spellHit()){
 						enemies.get(spellsThrown.get(loop).getTarget()).getHealth(spellsThrown.get(loop).getDamage());
+						enemies.get(spellsThrown.get(loop).getTarget()).statusPresent(spellsThrown.get(loop).getEffect());
 						spellsThrown.remove(loop);
 						checkEnemyPresence();
 					}
@@ -154,7 +156,7 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 				//Enemy Attacks
 				int enemyLoop;
 				for (enemyLoop = 0; enemyLoop < enemies.size(); enemyLoop++){
-					enemies.get(enemyLoop).attack(player.centerX(), player.centerY());
+					enemies.get(enemyLoop).attack(player.centerX(), player.centerY(), 12);
 				}
 			}
 		}
@@ -185,9 +187,13 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 		if (scene == BATTLE){
 			if (!battleWon){
 				int target = 0;
-				if (hurlPebble.contains(mX, mY) && player.getStamina() >= 33.3 && !player.getDeath()){
-					spellsThrown.add(new Spell(0, Color.LIGHT_GRAY, player.centerX(), player.centerY(), enemies.get(target).centerX(), enemies.get(target).centerY(), target));
+				if (kickDirt.contains(mX, mY) && player.getStamina() >= 33.3 && !player.getDeath()){
+					spellsThrown.add(new Spell(0, new Color(153, 76, 0), player.centerX(), player.centerY(), enemies.get(target).centerX(), enemies.get(target).centerY(), target));
 					player.staminaGain(-333);
+				}
+				if (hurlPebble.contains(mX, mY) && player.getStamina() >= 100 && !player.getDeath()){
+					spellsThrown.add(new Spell(1, Color.LIGHT_GRAY, player.centerX(), player.centerY(), enemies.get(target).centerX(), enemies.get(target).centerY(), target));
+					player.staminaGain(-1000);
 				}
 			}
 		}
@@ -233,8 +239,13 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 		else if (scene == BATTLE){
 			if (keyID == KeyEvent.VK_SPACE && player.getStamina() >= 33.3 && !player.getDeath() && !battleWon){
 				int target = 0;
-				spellsThrown.add(new Spell(0, Color.LIGHT_GRAY, player.centerX(), player.centerY(), enemies.get(target).centerX(), enemies.get(target).centerY(), target));
+				spellsThrown.add(new Spell(0, new Color(153, 76, 0), player.centerX(), player.centerY(), enemies.get(target).centerX(), enemies.get(target).centerY(), target));
 				player.staminaGain(-333);
+			}
+			if (keyID == KeyEvent.VK_ENTER && player.getStamina() == 100 && !player.getDeath() && !battleWon){
+				int target = 0;
+				spellsThrown.add(new Spell(1, Color.LIGHT_GRAY, player.centerX(), player.centerY(), enemies.get(target).centerX(), enemies.get(target).centerY(), target));
+				player.staminaGain(-1000);
 			}
 			if ((keyID == KeyEvent.VK_ENTER || keyID == KeyEvent.VK_SPACE) && battleWon) {
 				if (player.levelUp()){
@@ -351,11 +362,18 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 			g.fillRect(getWidth()-167, 503, (int)(144*player.getStamina()/100), hgt-12);
 			
 			//Basic Attack
-			adv = metrics.stringWidth("Hurl Pebble");
+			adv = metrics.stringWidth("Kick Dirt");
 			g.setColor(Color.DARK_GRAY);
 			g.fillRect(20, 470, adv+10, 30);
 			g.setColor(Color.WHITE);
-			g.drawString("Hurl Pebble", 25, 492);
+			g.drawString("Kick Dirt", 25, 492);
+			
+			//Spell 1
+			adv = metrics.stringWidth("Hurl Pebble");
+			g.setColor(Color.DARK_GRAY);
+			g.fillRect(20, 510, adv+10, 30);
+			g.setColor(Color.WHITE);
+			g.drawString("Hurl Pebble", 25, 532);
 		}
 	}
 	
@@ -375,7 +393,7 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	
 	public void checkAllyPresence(){
 		if (scene == BATTLE){
-			int loop;
+			//int loop;
 			int deadCounter = 0;
 			if (player.getDeath())
 				deadCounter++;
