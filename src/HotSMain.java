@@ -125,24 +125,26 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 			
 		}
 		if (scene == BATTLE){
-			int loop;
 			if (source == moveTimer){
 				//Spell Movement
-				for (loop = 0; loop < spellsThrown.size(); loop++){
-					spellsThrown.get(loop).move();
-					if (spellsThrown.get(loop).spellHit()){
-						enemies.get(spellsThrown.get(loop).getTarget()).getHealth(spellsThrown.get(loop).getDamage());
-						spellsThrown.remove(loop);
+				for (int spellNum = 0; spellNum < spellsThrown.size(); spellNum++){
+					Spell spell = spellsThrown.get(spellNum);
+					spell.move();
+					if (spell.spellHit()){
+						enemies.get(spell.getTarget()).takeDamage(spell.getDamage());
+						spellsThrown.remove(spellNum);
 						checkEnemyPresence();
 					}
 				}
-				int enemyLoop;
-				for (enemyLoop = 0; enemyLoop < enemies.size(); enemyLoop++){		
-					for (loop = 0; loop < enemies.get(enemyLoop).spellsThrown.size(); loop++){
-						enemies.get(enemyLoop).spellsThrown.get(loop).move();
-						if (enemies.get(enemyLoop).spellsThrown.get(loop).spellHit()){
-							player.getHealth(enemies.get(enemyLoop).spellsThrown.get(loop).getDamage());
-							enemies.get(enemyLoop).spellsThrown.remove(loop);
+				
+				for (int enemyLoop = 0; enemyLoop < enemies.size(); enemyLoop++){
+					Enemy enemy = enemies.get(enemyLoop);
+					for (int spellNum = 0; spellNum < enemy.spellsThrown.size(); spellNum++){
+						Spell spell = enemy.spellsThrown.get(spellNum);
+						spell.move();
+						if (spell.spellHit()){
+							player.takeDamage(spell.getDamage());
+							enemy.spellsThrown.remove(spellNum);
 							checkAllyPresence();
 						}
 					}
@@ -162,11 +164,11 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 		
 		//To check collision
 		if (scene == OVERWORLD){
-			int loop;
-			for (loop = 0; loop < enemies.size(); loop++){
-				if (enemies.get(loop).hitbox().intersects(player.hitbox())){
+			for (int loop = 0; loop < enemies.size(); loop++){
+				Enemy enemy = enemies.get(loop);
+				if (enemy.hitbox().intersects(player.hitbox())){
 					player.combatChange(true);
-					enemies.get(loop).combatChange(true);
+					enemy.combatChange(true);
 					battleBegin();
 				}
 			}
@@ -220,11 +222,11 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 				menuScreen.setVisible(!visibleState);
 			}
 			
-			int loop;
-			for (loop = 0; loop < enemies.size(); loop++){
-				if (enemies.get(loop).hitbox().intersects(player.hitbox())){
+			for (int enemyNum = 0; enemyNum < enemies.size(); enemyNum++){
+				Enemy enemy = enemies.get(enemyNum);
+				if (enemy.hitbox().intersects(player.hitbox())){
 					player.combatChange(true);
-					enemies.get(loop).combatChange(true);
+					enemy.combatChange(true);
 					battleBegin();
 				}
 			}
@@ -283,12 +285,12 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 			battleBG = 1;
 			player.battleBegin(235, 380);
 			int placed = 0;
-			int loop;
-			for (loop = 0; loop < enemies.size(); loop++){
-				if (enemies.get(loop).getActivity()){
-					enemies.get(loop).battleBegin(440-20*placed, 125);
+			for (int enemyNum = 0; enemyNum < enemies.size(); enemyNum++){
+				Enemy enemy = enemies.get(enemyNum);
+				if (enemy.getActivity()){
+					enemy.battleBegin(440-20*placed, 125);
 					placed++;
-					totalExperience += enemies.get(loop).getEXP();
+					totalExperience += enemy.getEXP();
 				}
 			}
 		}
@@ -298,8 +300,7 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 			battleBG = 2;
 			player.battleBegin(650, 365);
 			int placed = 0;
-			int loop;
-			for (loop = 0; loop < enemies.size(); loop++){
+			for (int loop = 0; loop < enemies.size(); loop++){
 				if (enemies.get(loop).getActivity()){
 					enemies.get(loop).battleBegin(340-20*placed, 145);
 					placed++;
@@ -327,15 +328,15 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 			FontMetrics metrics = g.getFontMetrics(new Font("Bell MT", Font.BOLD, 20));
 			int hgt = metrics.getHeight();
 			//Hgt = 26
-			int adv = metrics.stringWidth(player.getHealth(0)+"/"+player.getMaxHealth(0));
+			int adv = metrics.stringWidth(player.getHealth()+"/"+player.getMaxHealth(0));
 			g.setColor(Color.DARK_GRAY);
 			g.fillRect(getWidth()-170, 470, 150, hgt-6);
-			if ((double)player.getHealth(0)/player.getMaxHealth(0) > .25)
+			if ((double)player.getHealth()/player.getMaxHealth(0) > .25)
 				g.setColor(Color.RED);
 			else
 				g.setColor(player.getLowHealth());
-			g.drawString(player.getHealth(0)+"/"+player.getMaxHealth(0), getWidth()-adv-180, 461+hgt);		
-			g.fillRect(getWidth()-167, 473, (int)(144*player.getHealth(0)/player.getMaxHealth(0)), hgt-12);
+			g.drawString(player.getHealth()+"/"+player.getMaxHealth(0), getWidth()-adv-180, 461+hgt);		
+			g.fillRect(getWidth()-167, 473, (int)(144*player.getHealth()/player.getMaxHealth(0)), hgt-12);
 			
 			//Stamina
 			g.setColor(Color.DARK_GRAY);
