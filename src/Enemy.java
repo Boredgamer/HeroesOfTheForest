@@ -3,7 +3,7 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 
 
-public class Enemy {
+public class Enemy extends Character {
 
 	protected int xPos;
 	protected int yPos;
@@ -11,9 +11,8 @@ public class Enemy {
 	protected static int ySize;
 	protected Rectangle overworldCollision;
 	protected boolean inCombat = false;
-	protected static int maxhp;
-	protected int hp;
-	protected boolean dead = false;
+
+
 	protected int exp;
 	protected ArrayList<Spell> spellsThrown = new ArrayList<Spell>();
 	protected int stamina = 0;
@@ -54,31 +53,7 @@ public class Enemy {
 	//Battle
 	public void attack(int x, int y, int s){
 	}
-	
-	public int getHealth(int x){
-		hp -= x;
-		if (hp > maxhp)
-			hp = maxhp;
-		else if (hp <= 0)
-			death();
-		return hp;
-	}
-	
-	public void statusPresent(String s){
-		if (s == "Stun"){
-			statusRemover = 0;
-			status = "Stun";
-		}
-	}
-	
-	public void death(){
-		dead = true;
-	}
-	
-	public boolean getDeath(){
-		return dead;
-	}
-	
+
 	public int getEXP(){
 		return exp;
 	}
