@@ -10,15 +10,15 @@ import java.util.ArrayList;
 public class HotSMain extends JPanel implements ActionListener, MouseListener, MouseMotionListener, KeyListener{
 	
 	//General
-	private int scene = 2;
+	private int scene = OVERWORLD;
 	private static int TITLE = 0;
 	private static int PROLOGUE = 1;
 	private static int OVERWORLD = 2;
 	private static int MENU = 3;
 	private static int BATTLE = 4;
 	
-	private Timer timer = new Timer(10, this);
 	private Player player;
+	ArrayList<Ally> allies = new ArrayList<Ally>();
 	ArrayList<Enemy> enemies = new ArrayList<Enemy>();
 	private JFrame frame = new JFrame();
 	private Container canvas = frame.getContentPane();
@@ -31,6 +31,7 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	private boolean moveDown = false;
 	private boolean moveLeft = false;
 	private boolean moveRight = false;
+	private Timer moveTimer = new Timer(10, this);
 	
 	private JPanel menuScreen = new JPanel();
 	private ArrayList<JButton> menuButtons = new ArrayList<JButton>();
@@ -42,13 +43,15 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	private JButton dataButton = new JButton("Data");
 	
 	//Battle
-	ArrayList<Integer> combativeEnemies = new ArrayList<Integer>();	
 	private int battleBG;
+	private Timer staminaTimer = new Timer(100, this);
 	ArrayList<Spell> spellsThrown = new ArrayList<Spell>();
-	private Rectangle throwAcorn = new Rectangle(20, 500, 130, 30);
+	private Rectangle hurlPebble = new Rectangle(20, 500, 130, 30);
 	private boolean battleWon;
+	private boolean battleLost;
 	private int totalExperience = 0;
 	private boolean nextWindow = false;
+	
 	
 	public HotSMain(){
 		//General
@@ -88,14 +91,14 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 		frame.addKeyListener(this);
 		frame.addMouseListener(this);
 		frame.addMouseMotionListener(this);
-		timer.start();
+		moveTimer.start();
 	}
 	
 	public void actionPerformed(ActionEvent a){
 		Object source = a.getSource();
 		
-		if (scene == 2){
-			if (source == timer){
+		if (scene == OVERWORLD){
+			if (source == moveTimer){
 				if (moveUp && !moveDown)
 					player.moveUp();
 				else if (!moveUp && moveDown)
@@ -121,9 +124,10 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 				dataButton.setText("DATA");
 			
 		}
-		if (scene == 4){
-			if (source == timer){
-				int loop;
+		if (scene == BATTLE){
+			int loop;
+			if (source == moveTimer){
+				//Spell Movement
 				for (loop = 0; loop < spellsThrown.size(); loop++){
 					spellsThrown.get(loop).move();
 					if (spellsThrown.get(loop).spellHit()){
@@ -131,13 +135,33 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 						spellsThrown.remove(loop);
 						checkEnemyPresence();
 					}
-				}	
+				}
+				int enemyLoop;
+				for (enemyLoop = 0; enemyLoop < enemies.size(); enemyLoop++){		
+					for (loop = 0; loop < enemies.get(enemyLoop).spellsThrown.size(); loop++){
+						enemies.get(enemyLoop).spellsThrown.get(loop).move();
+						if (enemies.get(enemyLoop).spellsThrown.get(loop).spellHit()){
+							player.getHealth(enemies.get(enemyLoop).spellsThrown.get(loop).getDamage());
+							enemies.get(enemyLoop).spellsThrown.remove(loop);
+							checkAllyPresence();
+						}
+					}
+				}
+			}
+			if (source == staminaTimer){
+				//Stamina Regeneration
+				player.staminaGain(16);
+				//Enemy Attacks
+				int enemyLoop;
+				for (enemyLoop = 0; enemyLoop < enemies.size(); enemyLoop++){
+					enemies.get(enemyLoop).attack(player.centerX(), player.centerY());
+				}
 			}
 		}
 		repaint();
 		
 		//To check collision
-		if (scene == 2){
+		if (scene == OVERWORLD){
 			int loop;
 			for (loop = 0; loop < enemies.size(); loop++){
 				if (enemies.get(loop).hitbox().intersects(player.hitbox())){
@@ -158,10 +182,13 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	}
 	
 	public void mouseClicked(MouseEvent e){
-		if (scene == 4){
-			int target = 0;
-			if (throwAcorn.contains(mX, mY)){
-				spellsThrown.add(new Spell(0, player.centerX(), player.centerY(), enemies.get(target).centerX(), enemies.get(target).centerY(), target));
+		if (scene == BATTLE){
+			if (!battleWon){
+				int target = 0;
+				if (hurlPebble.contains(mX, mY) && player.getStamina() >= 33.3 && !player.getDeath()){
+					spellsThrown.add(new Spell(0, Color.LIGHT_GRAY, player.centerX(), player.centerY(), enemies.get(target).centerX(), enemies.get(target).centerY(), target));
+					player.staminaGain(-333);
+				}
 			}
 		}
 	}
@@ -173,7 +200,7 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	public void keyPressed(KeyEvent e){
 		int keyID = e.getKeyCode();
 		
-		if (scene == 2){
+		if (scene == OVERWORLD){
 			if (keyID == KeyEvent.VK_UP || keyID == KeyEvent.VK_W){
 				moveUp = true;
 			}
@@ -203,7 +230,12 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 			}
 		}
 		
-		else if (scene == 4){
+		else if (scene == BATTLE){
+			if (keyID == KeyEvent.VK_SPACE && player.getStamina() >= 33.3 && !player.getDeath() && !battleWon){
+				int target = 0;
+				spellsThrown.add(new Spell(0, Color.LIGHT_GRAY, player.centerX(), player.centerY(), enemies.get(target).centerX(), enemies.get(target).centerY(), target));
+				player.staminaGain(-333);
+			}
 			if ((keyID == KeyEvent.VK_ENTER || keyID == KeyEvent.VK_SPACE) && battleWon) {
 				if (player.levelUp()){
 					nextWindow = true;
@@ -219,7 +251,7 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	public void keyReleased(KeyEvent e){
 		int keyID = e.getKeyCode();
 		
-		if (scene == 2){
+		if (scene == OVERWORLD){
 			if (keyID == KeyEvent.VK_UP || keyID == KeyEvent.VK_W){
 				moveUp = false;
 			}
@@ -237,7 +269,7 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	
 	//Transitions from Overworld to Battle scene
 	public void battleBegin(){
-		scene = 4;
+		scene = BATTLE;
 		moveUp = false;
 		moveDown = false;
 		moveLeft = false;
@@ -276,13 +308,14 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 			}
 		}
 		menuScreen.setVisible(false);
+		staminaTimer.start();
 	}
 	
 	//Draws the Battle Menu
 	public void drawMenu(Graphics g){
-		if (scene == 4){
+		if (scene == BATTLE){
 			//Background
-			g.setColor(Color.GREEN);
+			g.setColor(new Color(0, 100, 0));
 			g.fillRect(0, 450, 800, 150);
 			g.setColor(Color.BLACK);
 			g.fillRect(10, 460, 780, 130);
@@ -295,27 +328,39 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 			int hgt = metrics.getHeight();
 			//Hgt = 26
 			int adv = metrics.stringWidth(player.getHealth(0)+"/"+player.getMaxHealth(0));
-			g.drawString(player.getHealth(0)+"/"+player.getMaxHealth(0), getWidth()-adv-180, 461+hgt);		
 			g.setColor(Color.DARK_GRAY);
 			g.fillRect(getWidth()-170, 470, 150, hgt-6);
+			if ((double)player.getHealth(0)/player.getMaxHealth(0) > .25)
+				g.setColor(Color.RED);
+			else
+				g.setColor(player.getLowHealth());
+			g.drawString(player.getHealth(0)+"/"+player.getMaxHealth(0), getWidth()-adv-180, 461+hgt);		
+			g.fillRect(getWidth()-167, 473, (int)(144*player.getHealth(0)/player.getMaxHealth(0)), hgt-12);
 			
 			//Stamina
+			g.setColor(Color.DARK_GRAY);
 			g.fillRect(getWidth()-170, 500, 150, hgt-6);
-			adv = metrics.stringWidth(player.getStamina()+"%");	
-			g.setColor(Color.WHITE);
-			g.drawString(player.getStamina()+"%", getWidth()-adv-180, 491+hgt);
+			adv = metrics.stringWidth((int)player.getStamina()+"%");	
+			if (player.getStamina() < 33.3)
+				g.setColor(Color.WHITE);
+			else if (player.getStamina() == 100)
+				g.setColor(Color.GREEN);
+			else
+				g.setColor(Color.CYAN);
+			g.drawString((int)player.getStamina()+"%", getWidth()-adv-180, 491+hgt);
+			g.fillRect(getWidth()-167, 503, (int)(144*player.getStamina()/100), hgt-12);
 			
-			//Spell Tester
-			adv = metrics.stringWidth("Throw acorn");
+			//Basic Attack
+			adv = metrics.stringWidth("Hurl Pebble");
 			g.setColor(Color.DARK_GRAY);
 			g.fillRect(20, 470, adv+10, 30);
 			g.setColor(Color.WHITE);
-			g.drawString("Throw Acorn", 25, 492);
+			g.drawString("Hurl Pebble", 25, 492);
 		}
 	}
 	
 	public void checkEnemyPresence(){
-		if (scene == 4){
+		if (scene == BATTLE){
 			int loop;
 			int deadCounter = 0;
 			for (loop = 0; loop < enemies.size(); loop++){
@@ -328,8 +373,36 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 		}
 	}
 	
+	public void checkAllyPresence(){
+		if (scene == BATTLE){
+			int loop;
+			int deadCounter = 0;
+			if (player.getDeath())
+				deadCounter++;
+			/*for (loop = 0; loop < allies.size(); loop++){
+				if (allies.get(loop).getDeath())
+					deadCounter++;
+			}*/
+			if (deadCounter == allies.size()+1)
+				defeat();
+		}
+	}
+	
 	public void victory(){
 		battleWon = true;
+		player.expGain(totalExperience);
+		enemies.removeAll(enemies);
+		spellsThrown.removeAll(spellsThrown);
+		staminaTimer.stop();
+	}
+	
+	public void defeat(){
+		battleLost = true;
+		staminaTimer.stop();
+		int loop;
+		for (loop = 0; loop < enemies.size(); loop++){
+			enemies.get(loop).spellsThrown.removeAll(spellsThrown);
+		}
 	}
 	
 	public void drawVictory(Graphics g){
@@ -343,10 +416,10 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 			FontMetrics metrics = g.getFontMetrics(new Font("Bell MT", Font.BOLD, 20));
 			int hgt = metrics.getHeight();
 			//Hgt = 26
-			int adv = metrics.stringWidth(player.getName()+ " is now level "+player.getLevel()+"!");
+			int adv = metrics.stringWidth("You have gotten stronger.");
+			g.drawString("You have gotten stronger.", getWidth()/2-adv/2, 269+hgt);
+			adv = metrics.stringWidth(player.getName()+ " is now level "+player.getLevel()+"!");
 			g.drawString(player.getName()+ " is now level "+player.getLevel()+"!", getWidth()/2-adv/2, 234+hgt);
-			adv = metrics.stringWidth("+2 skill points");
-			g.drawString("You and your allies gain "+totalExperience+" experience!", getWidth()/2-adv/2, 269+hgt);
 		}
 		else{
 			g.setColor(new Color(0, 0, 0, 200));
@@ -365,10 +438,32 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 		}
 	}
 	
+	public void drawDefeat(Graphics g){
+		g.setColor(new Color(0, 0, 0, 200));
+		g.fillRect(195, 220, 410, 110);
+		g.setColor(new Color(255, 255, 255, 200));
+		g.fillRect(200, 225, 400, 100);
+		g.setColor(new Color(0, 0, 0, 200));
+		g.setFont(new Font("Bell MT", Font.BOLD, 20));
+		FontMetrics metrics = g.getFontMetrics(new Font("Bell MT", Font.BOLD, 20));
+		int hgt = metrics.getHeight();
+		//Hgt = 26
+		int adv = metrics.stringWidth("You all fainted.");
+		g.drawString("You all fainted.", getWidth()/2-adv/2, 234+hgt);
+		adv = metrics.stringWidth("Defenseless, you are all eaten.");
+		g.drawString("Defenseless, you are all eaten.", getWidth()/2-adv/2, 269+hgt);
+	}
+	
 	public void battleEnd(){
-		scene = 2;
-		ImageIcon bg = new ImageIcon("Overworld.jpg");
+		scene = OVERWORLD;
+		ImageIcon bg = new ImageIcon("OverworldBG.jpg");
 		background = bg.getImage();
+		player.battleEnd();
+		totalExperience = 0;
+		nextWindow = false;
+		battleWon = false;
+		
+		enemies.add(new Stalker(175, 200));
 	}
 	
 	public void keyTyped(KeyEvent e){
@@ -386,9 +481,9 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	
 	public void paintComponent(Graphics g){
 		super.paintComponent(g);
-		if (scene == 2)
+		if (scene == OVERWORLD)
 			g.drawImage(background, 0, 0, this);
-		if (scene == 4){
+		if (scene == BATTLE){
 			if (battleBG == 1)
 				g.drawImage(background, 0, -130, this);
 			else
@@ -396,10 +491,10 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 		}
 		int loop;
 		for (loop = 0; loop < enemies.size(); loop++){
-			if (scene == 2){
+			if (scene == OVERWORLD){
 				enemies.get(loop).drawEnemy(g);
 			}
-			if (scene == 4){
+			if (scene == BATTLE){
 				if (enemies.get(loop).getActivity()){
 					enemies.get(loop).drawEnemy(g);
 				}
@@ -409,10 +504,15 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 			spellsThrown.get(loop).drawSpell(g);
 		}
 		player.drawPlayer(g);
-		if (scene == 4){
+		for (loop = 0; loop < enemies.size(); loop++){
+			enemies.get(loop).drawSpells(g);
+		}
+		if (scene == BATTLE){
 			drawMenu(g);
 			if (battleWon)
 				drawVictory(g);
+			else if (battleLost)
+				drawDefeat(g);
 		}
 	}
 
