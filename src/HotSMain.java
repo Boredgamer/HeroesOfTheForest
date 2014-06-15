@@ -143,7 +143,7 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 						Spell spell = enemy.spellsThrown.get(spellNum);
 						spell.move();
 						if (spell.spellHit()){
-							player.getHealth(spell.getDamage());
+							player.takeDamage(spell.getDamage());
 							enemy.spellsThrown.remove(spellNum);
 							checkAllyPresence();
 						}
@@ -328,15 +328,15 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 			FontMetrics metrics = g.getFontMetrics(new Font("Bell MT", Font.BOLD, 20));
 			int hgt = metrics.getHeight();
 			//Hgt = 26
-			int adv = metrics.stringWidth(player.getHealth(0)+"/"+player.getMaxHealth(0));
+			int adv = metrics.stringWidth(player.getHealth()+"/"+player.getMaxHealth(0));
 			g.setColor(Color.DARK_GRAY);
 			g.fillRect(getWidth()-170, 470, 150, hgt-6);
-			if ((double)player.getHealth(0)/player.getMaxHealth(0) > .25)
+			if ((double)player.getHealth()/player.getMaxHealth(0) > .25)
 				g.setColor(Color.RED);
 			else
 				g.setColor(player.getLowHealth());
-			g.drawString(player.getHealth(0)+"/"+player.getMaxHealth(0), getWidth()-adv-180, 461+hgt);		
-			g.fillRect(getWidth()-167, 473, (int)(144*player.getHealth(0)/player.getMaxHealth(0)), hgt-12);
+			g.drawString(player.getHealth()+"/"+player.getMaxHealth(0), getWidth()-adv-180, 461+hgt);		
+			g.fillRect(getWidth()-167, 473, (int)(144*player.getHealth()/player.getMaxHealth(0)), hgt-12);
 			
 			//Stamina
 			g.setColor(Color.DARK_GRAY);

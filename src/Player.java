@@ -93,7 +93,7 @@ public class Player {
 	}
 	
 	//Battle
-	public int getHealth(int x){
+	public int takeDamage(int x){
 		hp -= x;
 		if (hp > maxhp)
 			hp = maxhp;
@@ -101,6 +101,10 @@ public class Player {
 			hp = 0;
 			death();
 		}
+		return hp;
+	}
+	
+	public int getHealth() {
 		return hp;
 	}
 	
