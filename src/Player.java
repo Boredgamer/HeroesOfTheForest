@@ -1,7 +1,7 @@
 import java.awt.*;
 
 
-public class Player {
+public class Player extends Character {
 	
 	//Details
 	private boolean isMale;
@@ -23,9 +23,8 @@ public class Player {
 
 	//Battle
 	private int maxhp = 12;
-	private int hp;
+
 	private int healthBlinker = 0;
-	private boolean dead = false;
 	private int stamina = 0;
 	private int level = 1;
 	private int experience = 0;
@@ -35,7 +34,7 @@ public class Player {
 	public Player(){
 		xPos = 390;
 		yPos = 500;
-		hp = maxhp;
+		hp = 12;
 	}
 	
 	//Overworld
@@ -104,9 +103,7 @@ public class Player {
 		return hp;
 	}
 	
-	public int getHealth() {
-		return hp;
-	}
+
 	
 	public int getMaxHealth(int x){
 		maxhp += x;
@@ -134,14 +131,7 @@ public class Player {
 	public double getStamina(){
 		return stamina/10;
 	}
-	
-	public void death(){	
-		dead = true;
-	}
-	
-	public boolean getDeath(){
-		return dead;
-	}
+
 	
 	public void expGain(int x){
 		expToGive = x;
