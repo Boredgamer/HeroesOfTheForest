@@ -359,6 +359,7 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 				g.setColor(Color.GREEN);
 			else
 				g.setColor(Color.CYAN);
+			
 			g.drawString((int)player.getStamina()+"%", getWidth()-adv-180, 491+hgt);
 			g.fillRect(getWidth()-167, 503, (int)(144*player.getStamina()/100), hgt-12);
 			
@@ -425,36 +426,32 @@ public class HotSMain extends JPanel implements ActionListener, MouseListener, M
 	}
 	
 	public void drawVictory(Graphics g){
+		g.setColor(new Color(0, 0, 0, 200));
+		g.fillRect(195, 220, 410, 110);
+		g.setColor(new Color(255, 255, 255, 200));
+		g.fillRect(200, 225, 400, 100);
+		g.setColor(new Color(0, 0, 0, 200));
+		g.setFont(new Font("Bell MT", Font.BOLD, 20));
+		FontMetrics metrics = g.getFontMetrics(new Font("Bell MT", Font.BOLD, 20));
+		int hgt = metrics.getHeight();
+		
+		String initialMessage;
+		String followupMessage;
+		
 		if (nextWindow){
-			g.setColor(new Color(0, 0, 0, 200));
-			g.fillRect(195, 220, 410, 110);
-			g.setColor(new Color(255, 255, 255, 200));
-			g.fillRect(200, 225, 400, 100);
-			g.setColor(new Color(0, 0, 0, 200));
-			g.setFont(new Font("Bell MT", Font.BOLD, 20));
-			FontMetrics metrics = g.getFontMetrics(new Font("Bell MT", Font.BOLD, 20));
-			int hgt = metrics.getHeight();
-			//Hgt = 26
-			int adv = metrics.stringWidth("You have gotten stronger.");
-			g.drawString("You have gotten stronger.", getWidth()/2-adv/2, 269+hgt);
-			adv = metrics.stringWidth(player.getName()+ " is now level "+player.getLevel()+"!");
-			g.drawString(player.getName()+ " is now level "+player.getLevel()+"!", getWidth()/2-adv/2, 234+hgt);
+			initialMessage = "You have gotten stronger.";
+			followupMessage = player.getName()+ " is now level " + player.getLevel() + "!";
 		}
 		else{
-			g.setColor(new Color(0, 0, 0, 200));
-			g.fillRect(195, 220, 410, 110);
-			g.setColor(new Color(255, 255, 255, 200));
-			g.fillRect(200, 225, 400, 100);
-			g.setColor(new Color(0, 0, 0, 200));
-			g.setFont(new Font("Bell MT", Font.BOLD, 20));
-			FontMetrics metrics = g.getFontMetrics(new Font("Bell MT", Font.BOLD, 20));
-			int hgt = metrics.getHeight();
-			//Hgt = 26
-			int adv = metrics.stringWidth("You survived!");
-			g.drawString("You survived!", getWidth()/2-adv/2, 234+hgt);
-			adv = metrics.stringWidth("You and your allies gain "+totalExperience+" experience!");
-			g.drawString("You and your allies gain "+totalExperience+" experience!", getWidth()/2-adv/2, 269+hgt);
+			initialMessage = "You survived!";
+			followupMessage = "You and your allies gain " + totalExperience + " experience!";
 		}
+		
+		//Hgt = 26
+		int adv = metrics.stringWidth(initialMessage);
+		g.drawString(initialMessage, getWidth()/2-adv/2, 234+hgt);
+		adv = metrics.stringWidth(followupMessage);
+		g.drawString(followupMessage, getWidth()/2-adv/2, 269+hgt);
 	}
 	
 	public void drawDefeat(Graphics g){
